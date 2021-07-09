@@ -12,7 +12,8 @@
   font-family: sans-serif;
   text-align: center;
   color: #2c3e50;
-  background-image: url(./assets/Paule.png); 
+  background-image: url(./assets/Paule.jpg); 
+
 }
 
 #nav {

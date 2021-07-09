@@ -6,7 +6,7 @@
     /><br />
     
     
-    <div class="bar">                                              
+    <div class="box">                                              
       <h1>Your favourite Link Shortener</h1>
       <el-menu
         :default-active="activeIndex"
@@ -171,6 +171,9 @@ export default {
 </script>
 
 <style scoped>
+p{
+  margin-top: 25px;
+}
 
 h1{
   text-align: center;
@@ -180,8 +183,8 @@ h1{
   max-width: 250px;
 }
 
-.bar {
-  width: 60%;
+.box {
+  width: 30%;
   background-color:white;
   border-radius: 4px;
   border: 1px solid #dcdfe6;
@@ -190,4 +193,5 @@ h1{
   overflow: auto;
   margin-bottom: 50px;
 }
+
 </style>

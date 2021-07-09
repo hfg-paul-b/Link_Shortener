@@ -1,8 +1,13 @@
+// Express einbinden
 const express = require('express')
 const app = express()
 const port = 4000
 app.use(express.json())
 
+// Array mit Zahlen
+const chars = '0123456789'.split('') 
+
+// CORS Extension im Chrome Browser umgehen
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
@@ -12,7 +17,7 @@ app.use(function(req, res, next) {
 next();
 });
 
-// MongoDB-Client
+// mit MongoDB Datenbank connecten
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://Paul:2203@cluster0.bhydk.mongodb.net/quappenbase?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -21,13 +26,12 @@ let connection = ""
 let adminPost = ""
 stat = 500
 
-const chars = '0123456789'.split('') // Array mit Zahlen
 
 // Verbindung herstellen
 connectDB()
 
 
-// Funktion stellt Verbindung zur Datenbank her
+// Funktion zur Verbindung mit DB und Fehlerausgabe
 async function connectDB() {
 
     try {
@@ -42,12 +46,13 @@ async function connectDB() {
     }
 }
 
-
+ // Generierung des Admin-Kürzels
 function generateAdmin() {
     
-    let short = ""                                                     // String für generiertes Admin-Kürzel
+    let short = ""                                                    
 
-    for (let i = 0; i < 6; i++) {                                      // random 6 Stellen
+    // random 5 Stellen
+    for (let i = 0; i < 5; i++) {                                      
         short += chars[Math.floor(Math.random() * chars.length)]
     }
 
@@ -55,62 +60,67 @@ function generateAdmin() {
 }
 
 
-// Kürzelgenerierung (wird in shorter angewandt)
+// Kürzel werden hier generiert über "shortUrl"
 function generateShort(url) {
 
-    // trenne zuerst http(s)-Teil von der URL.
+    // http(s)-Teil wird von der URL getrennt.
     if (url.includes("//")) { 
         url = url.split("/")
         url = url[2]
     }
-    // nur Name der Domain behalten (entferne www, .de/com/...)
+
+    // Nur Domain-Name wird gespeichert
     url = url.split(".")
     let dom = url[url.length-2]
 
-    //kürze Domain
-    let shortUrl = dom.replace(/[aeiou]/g, "")            // ersetze alle Vokale
-    shortUrl = shortUrl.substring(0,3)                        // behalte nur die ersten 3 Stellen
+    //Domain wird gekürzt sowie Vokale ersetzt
+    let shortUrl = dom.replace(/[aeiou]/g, "")  
+
+    // nur die ersten 3 Stellen werden verwendet        
+    shortUrl = shortUrl.substring(0,3)                       
 
     const vow = "aeiou".split('')
 
-    let short = ""                                                  // String für generiertes Kürzel
+    let short = ""                                                  
 
-    for (let i = 0; i < 4; i++) {                                   // generiere zweiten Teil des Kürzels mit random 4 Stellen
+    // Zweiter Teil des Kürzels wird zufällig generiert mit 4 Stellen
+    for (let i = 0; i < 4; i++) {                                   
         short += chars[Math.floor(Math.random() * chars.length)]
     }
 
+    // Schnipsel werden zusammengefügt
     const acronym = shortUrl + "-" + short
     return acronym
 }
 
 
-// prüft URL und ordnet ein generiertes Kürzel zu
+// Überprüft URL und ordnet generiertes Kürzel zu
 async function shorter(url, short, mode) {
 
     console.log("url: " + url + ", short: " + short, ", mode:" + mode) 
     if (mode) {
-        console.log("true: Kürzel ist nicht random.")
+        console.log("true: acronym is not random.")
     } else {
-        console.log("false: Kürzel ist random.")
+        console.log("false: acronym is random.")
     }
 
-    // breche ab, falls URL oder Kürzel nicht gültig
+    // Wird abgebrochen wenn URL oder Kürzel nicht gültig ist
     if (url === "" || url.includes("http") === false) {
-        console.error("URL enthält ungültige Daten oder ist leer!")
-        // gebe Stauscode an
+        console.error("URL is empty or not available!")
+        // Status Code
         stat = 406
         return
     } 
     if (mode) {
         if (!short || short.includes("/") === true) {
-            console.error("Wunschkürzel ist leer oder enthält ungültige Zeichen!")
+            console.error("Own acronym is empty or not available!")
             // gebe Stauscode an
             stat = 416
             return
         }
     } 
     
-    // behalte übergebene URL
+    // Die übergebene URL wird behalten
     const link = url
     // Variable für Kürzel
     let acronym = ""
@@ -118,43 +128,43 @@ async function shorter(url, short, mode) {
     let admin = generateAdmin()
     adminPost = admin
 
-    // hier durch while-Schleife solange neues Kürzel generieren, bis ein noch nicht vorhandenes dabei rauskommt.
+    // Hier wird über eine While-Schleife solange neues Kürzel generiert, bis ein noch nicht verwendetes Kürzel gefunden wird.
     let exists = true
     while (exists === true) {
-        // überprüfe, ob ein Wunschkürzel (falls mode = true) festgelegt wurde -> Generierung würde wegfallen, übernehme Wunsch-Kürzel.
+        // Überprüft, ob ein eigenes Kürzel eingegeben wurde. Wenn ja wird es  übernommen. 
         if (mode) {
             acronym = short
         } else {
             acronym = generateShort(link)
         }
 
-        // prüfe, ob Eintrag mit generiertem Kürzel bereits existiert: kann ich zugreifen?
+        // Hier wird geprüft ob das Kürzel schon existiert
         let entry = await getUrlDB(acronym)
 
-        // wenn ein Eintrag schon vorhanden ist, breche ohne neuen Eintrag ab (return). Wenn nicht, führe Funktion weiter aus.
+        // Wenn es schon existiert wird abgebrochen. Wenn nicht wird die Funktion weiter ausgeführt.
         if (entry) {
-            console.log('Eintrag mit Kürzel existiert schon!')
+            console.log('Entry with shortUrl already exists!')
             if (mode) {
-                // gebe Stauscode an
+                // Statuscode
                 stat = 409
-                return // Abbruch, wenn Wunschkürzel schon existiert.
+                return 
             }
         } else {
-            console.error('Eintrag mit Kürzel existiert (noch) nicht!')
+            console.error('Entry does not exist!')
             exists = false
         }
 
         console.log(exists)
     }
 
-    // Eintrag mit Url und Short in Datenbank schreiben
+    // Url und Short wird in Datenbank geschrieben
     await writeFileDB(link, acronym, admin)
 
-    return acronym // Kürzel zurückgeben
+    return acronym 
 }
 
 
-// erstellt Eintrag in Datenbank
+// Eintrag in Datenbank
 async function writeFileDB(link, acronym, admin) {
     try {
         await connection.insertOne({
@@ -166,7 +176,7 @@ async function writeFileDB(link, acronym, admin) {
             // adminIP
         })
     } catch {
-        console.error("Eintrag konnte nicht erstellt werden.")
+        console.error("Entry could not be created.")
     }
 }
 
@@ -179,7 +189,7 @@ async function getUrlDB(acronym){
     return entry
 }
 
-// erhöht Klickzähler für Eintrag in Datenbank
+// Spricht Klickzähler an für die Datenbank
 async function addCounterDB(short, counter){
     let add = counter + 1
     console.log(add)
@@ -190,50 +200,48 @@ async function addCounterDB(short, counter){
             {$set: {clickCounter: add}}
         );
     } catch {
-        console.error("Eintrag konnte nicht aktualisiert werden.")
+        console.error("Entry could not be updated.")
     }
 }
 
 
-// "code" GET-Endpoint übergibt alle Informationen eines Datenbank-Eintrags
+// GET-Endpoint übergibt alle Informationen eines Datenbank-Eintrags
 app.get('/code/:inputcode', async (req, res) => {
-    //in req.params.inputcode steckt das was im Browser angehängt wurde!
     try {
         // suche und übergebe zugehörige URL für Shortlink
         let data = await getUrlDB(req.params.inputcode)
         res.status(200).send(data)
     } catch {
-        // Eintrag / URL existiert nicht
+        // URL existiert nicht
         res.status(stat).end()
     }
 })
 
 
-// "redirect" GET-Endpoint erhöht zusätzlich den Aufrufzähler für einen Link
+// Redirect GET-Endpoint erhöht Klickzähler für den Link
 app.get('/redirect/:inputcode', async (req, res) => {
     try {
         // suche und übergebe zugehörige URL für Shortlink
         let data = await getUrlDB(req.params.inputcode)
 
-        // Aufrufzähler für Link erhöhen
+        // Klickzähler erhöhen
         addCounterDB(data.shortCode, data.clickCounter)
 
         res.status(200).send(data)
     } catch {
-        // Eintrag / URL existiert nicht
+        // URL existiert nicht
         res.status(stat).end()
     }
 })
 
 
-// POST-Endpoint erstellt und speichert Kürzel für eine übergebene Url
+//  Kürzel für übergebene URL wird im POST-Endpoint erstellt und gespeichert
 app.post('/code/generate', async (req, res) => {
     try {
-        // Linkverkürzungsfunktion aufrufen
+        // Linkverkürzungsfunktion 
         let data = (await shorter(req.body.url, req.body.short, req.body.mode)).toString()
         res.status(201).send({ url: data, admin: adminPost }).end()
     } catch {
-        // keine shortUrl + Fehlermeldung
         res.status(stat).end()
     }
 })

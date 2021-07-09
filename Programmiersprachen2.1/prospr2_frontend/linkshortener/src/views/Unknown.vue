@@ -8,7 +8,6 @@
 </template>
 
 <script>
-// import axios from 'axios';
 
 export default {
   name: 'Unknown',
@@ -33,5 +32,13 @@ export default {
 </script>
 
 <style scoped>
+h1 {
+  color: aliceblue;
+  padding: 25px;
+}
+
+p {
+  color: aliceblue;
+}
 
 </style>

@@ -58,6 +58,15 @@ export default {
 </script>
 
 <style scoped>
-/* CSS-Teil betrifft dieses Dokument. */
 
+h1 {
+  color: aliceblue;
+  padding: 25px;
+}
+
+p{ 
+  font-size: 50px;
+font-weight: bold;
+color: black;
+}
 </style>
