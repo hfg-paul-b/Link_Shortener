@@ -2,7 +2,7 @@
   <div>
     <img
       src="../assets/scissors3.svg"
-      style="width: 420px; margin-bottom: 50px"
+      style="width: 420px; margin-bottom: 50px; margin-top: 100px"
     /><br />
     
     
@@ -61,7 +61,7 @@
           style="
             border: 1px solid white;
             display: border-box;
-            background-color: darkslateblue;
+            background-color: white;
             border-radius: 2px;
             padding: 0 18px;
           "
@@ -123,10 +123,10 @@ export default {
       console.log(key, keyPath);
     },
 
-    axiosPost(kuerzel, random) {
+    axiosPost(acronym, random) {
       axios
         .post("http://localhost:4000/code/generate", {
-          short: kuerzel,
+          short: acronym,
           url: this.inputLink,
           mode: random,
         })
@@ -151,9 +151,9 @@ export default {
       this.axiosPost(null, false);
     },
 
-    axiosGet(kuerzel) {
+    axiosGet(acronym) {
       axios
-        .get(`http://localhost:4000/code/${kuerzel}`)
+        .get(`http://localhost:4000/code/${acronym}`)
         .then((response) => {
           this.status = response.status + " " + response.statusText;
           this.error = false;
