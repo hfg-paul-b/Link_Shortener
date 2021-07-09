@@ -35,7 +35,7 @@ node index.js
 
 # Code Explained
 
-## index.js
+## Index.js
 Zunächst Wird Express eingebunden. Danach wird eine Verbindung zur MongoDB Datenbank aufgebaut. Ist dies erfolgt wird ein Adminkürzel generiert mit 5 zufälligen Zahlen.
 Im nächsten Schritt folgt eine Function zur generierung der URL-Kürzel. In der Function läuft eine "while" Schleife welche Überprüft ob der Link schon existiert. Ist dass der fall werden neue generiert bis eine, noch nicht vorhandene Kombination, gefunden wird. Ist das erfolgt wird die URL mit Kürzel in die Datenbank übergeben. Außerdem wird der Counter erhöht, zum einsehen auf der Admin Seite. 
 
